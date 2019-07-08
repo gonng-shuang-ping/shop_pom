@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <base th:href="${#request.getContextPath()+'/'}">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Insert title here</title>
+    <!-- Invalid Stylesheet. This makes stuff look pretty. Remove it if you want the CSS completely valid -->
+    <!-- Reset Stylesheet -->
+    <link rel="stylesheet" href="resources/css/reset.css" type="text/css"
+          media="screen" />
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="resources/css/style.css" type="text/css"
+          media="screen" />
+    <link rel="stylesheet" href="resources/css/invalid.css" type="text/css"
+          media="screen" />
+
+    <!--                       Javascripts                       -->
+    <!-- jQuery -->
+    <script type="text/javascript"
+            src="resources/scripts/jquery-1.8.3.min.js"></script>
+    <!-- jQuery Configuration -->
+    <!--<script type="text/javascript"-->
+    <!--src="resources/scripts/simpla.jquery.configuration.js"></script>-->
+
+    <!-- 添加弹出框的jquery插件 -->
+    <script type="text/javascript" src="resources/widget/dialog/jquery-ui-1.9.2.custom.min.js"></script>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+    <!-- 添加树形结构插件 ztree -->
+    <script type="text/javascript" src="resources/widget/zTree/jquery.ztree.all.min.js"></script>
+    <link rel="stylesheet" href="resources/widget/zTree/zTreeStyle/zTreeStyle.css">
+</head>
+<body>
+<div id="main-content">
+    <div class="content-box">
+        <!-- End .content-box-header -->
+        <div class="content-box-content">
+            <div class="tab-content default-tab" id="tab1">
+                <table>
+                    <thead>
+                    <tr>
+                        <th><input class="check-all" type="checkbox" /></th>
+                        <th>编号</th>
+                        <th>权限名称</th>
+                        <th>父权限</th>
+                        <th>权限路径</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="power : ${powers}">
+                        <td><input type="checkbox" /></td>
+                        <td th:text="${power.id}">Lorem ipsum dolor</td>
+                        <td th:text="${power.powername}"><a href="#" title="title">Sit amet</a></td>
+                        <td th:text="${power.pname==null ? '无':power.pname}">Consectetur adipiscing</td>
+                        <td th:text="${power.powerpath}">Donec tortor diam</td>
+                        <td th:switch="${power.status}">
+                            <span th:case="1">主菜单权限</span>
+                            <span th:case="2">子菜单权限</span>
+                            <span th:case="3">按钮权限</span>
+                        </td>
+                        <td>
+                            <!-- Icons --> <a href="#" title="Edit"><img
+                                src="resources/images/icons/pencil.png" alt="Edit" /></a> <a
+                                href="#" title="Delete"><img
+                                src="resources/images/icons/cross.png" alt="Delete" /></a> <a
+                                href="#" title="Edit Meta"><img
+                                src="resources/images/icons/hammer_screwdriver.png"
+                                alt="Edit Meta" /></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <div class="bulk-actions align-left">
+                                </select> <a sec:authorize-url="/power/poweradd" class="mybutton" onclick="open_powerAdd();">增加</a>
+                            </div>
+                            <!--<div class="pagination">-->
+                            <!--<a href="#" title="First Page">&laquo; First</a><a href="#"-->
+                            <!--title="Previous Page">&laquo; Previous</a> <a href="#"-->
+                            <!--class="number" title="1">1</a> <a href="#" class="number"-->
+                            <!--title="2">2</a> <a href="#" class="number current" title="3">3</a>-->
+                            <!--<a href="#" class="number" title="4">4</a> <a href="#"-->
+                            <!--title="Next Page">Next &raquo;</a><a href="#"-->
+                            <!--title="Last Page">Last &raquo;</a>-->
+                            <!--</div> &lt;!&ndash; End .pagination &ndash;&gt;-->
+                            <div class="clear"></div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <!-- End .content-box-content -->
+    </div>
+</div>
+<!-- End #main-content -->
+<script>
+    function open_powerAdd() {
+        $("#poweradd_dialog").dialog({
+            title: "添加权限",
+            width: 400,
+            height: 300,
+            modal: true
+        });
+    }
+
+    function show_power() {
+
+
+        var setting = {
+            data:{
+                key:{
+                    name:"powername"
+                },
+                simpleData:{
+                    enable:true,
+                    pIdKey:"pid"
+                }
+            },
+            view:{
+                showIcon: false
+            },
+            callback: {
+                onClick:function (event, treeId, treeNode) {
+                    if (treeNode.status==3){
+                        alert(treeNode.powername+"已是最低级权限不能作为父权限")
+                        return
+                    }
+                    $("#callpower").text(treeNode.powername);
+                    $("#power_add").dialog("close");
+
+                    $("#pid").val(treeNode.id);
+                    debugger;
+                    if (treeNode.status==1){
+                        $("#status_show_id").html("子菜单权限")
+                        $("#status").val(2);
+                    } if (treeNode.status==2){
+                        $("#status_show_id").html("按钮权限")
+                        $("#status").val(3);
+                    }
+                }
+            }
+        };
+        $.post("/power/powerajax",function (data) {
+            var zTreeObj=$.fn.zTree.init($("#ztreeDiv"),setting,data)
+            zTreeObj.expandAll(true)
+        },"json");
+        $("#power_add").dialog({
+            title: "添加父权限",
+            width: 200,
+            height: 200,
+            modal: true
+        });
+    }
+</script>
+
+<div id="poweradd_dialog" style="display: none">
+    <form action="/power/poweradd" method="post">
+        权限名称:<input name="powername"/><br/>
+        父权限:<button id="callpower" type="button" onclick="show_power()">无</button>
+                <input type="hidden" name="pid" id="pid" value="-1"/>
+        <br/>
+        权限路径:<input name="powerpath"/><br/>
+        状态:<span id="status_show_id">主菜单权限</span>
+        <input name="status" id="status" type="hidden" value="1"/><br/>
+        <input type="submit"value="提交" />
+    </form>
+</div>
+
+<div id="power_add" style="display: none">
+    <!-- ztree展示的容器 -->
+    <div id="ztreeDiv" class="ztree"></div>
+</div>
+
+</body>
+</html>

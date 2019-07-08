@@ -1,0 +1,19 @@
+server:
+  port: 8080
+spring:
+  thymeleaf:
+    cache: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 10B
+dubbo:
+  application:
+    name: back_web
+  registry:
+    address: zookeeper://192.168.75.188:2181
+  consumer:
+    check: false
+upload:
+  Path: E:/Download/

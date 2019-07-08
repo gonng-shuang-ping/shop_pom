@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qf.dao.PowerMapper">
+    <select id="querylist" resultType="com.qf.entity.Power">
+        select o.*,p.powername AS "pname" from power p RIGHT JOIN power o ON p.id=o.pid
+    </select>
+    <select id="queryPowerByRid" resultType="com.qf.entity.Power">
+        select p.*,
+            if((select rid from role_power_table where rid = #{rid} and pid = p.id),'true','false') as checked
+            from power p;
+    </select>
+</mapper>

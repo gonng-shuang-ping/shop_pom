@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
+<head>
+    <base th:href="${#request.getContextPath()+'/'}">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Insert title here</title>
+    <!-- Invalid Stylesheet. This makes stuff look pretty. Remove it if you want the CSS completely valid -->
+    <!-- Reset Stylesheet -->
+    <link rel="stylesheet" href="resources/css/reset.css" type="text/css"
+          media="screen" />
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="resources/css/style.css" type="text/css"
+          media="screen" />
+    <link rel="stylesheet" href="resources/css/invalid.css" type="text/css"
+          media="screen" />
+
+    <!--                       Javascripts                       -->
+    <!-- jQuery -->
+    <script type="text/javascript"
+            src="resources/scripts/jquery-1.8.3.min.js"></script>
+    <!-- jQuery Configuration -->
+    <!--<script type="text/javascript"-->
+    <!--src="resources/scripts/simpla.jquery.configuration.js"></script>-->
+
+    <!-- 添加弹出框的jquery插件 -->
+    <script type="text/javascript" src="resources/widget/dialog/jquery-ui-1.9.2.custom.min.js"></script>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+
+    <!-- 添加树形结构插件 ztree -->
+    <script type="text/javascript" src="resources/widget/zTree/jquery.ztree.all.min.js"></script>
+    <link rel="stylesheet" href="resources/widget/zTree/zTreeStyle/zTreeStyle.css">
+
+    <!--引入JS-->
+    <script type="text/javascript" src="resources/widget/webuploader/webuploader.min.js"></script>
+    <!--引入CSS-->
+    <link rel="stylesheet" href="resources/widget/webuploader/webuploader.css">
+
+
+</head>
+<body>
+<div id="main-content">
+    <div class="content-box">
+        <!-- End .content-box-header -->
+        <div class="content-box-content">
+            <div class="tab-content default-tab" id="tab1">
+                <table>
+                    <thead>
+                    <tr>
+                        <th><input class="check-all" type="checkbox" /></th>
+                        <th>商品id</th>
+                        <th>商品名称</th>
+                        <th>商品图片</th>
+                        <th>商品描述</th>
+                        <th>商品价格</th>
+                        <th>商品库存</th>
+                        <th>所属类别</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="good: ${goods}">
+                        <td><input type="checkbox" /></td>
+                        <td th:text="${good.id}">Lorem ipsum dolor</td>
+                        <td th:text="${good.gname}"><a href="#" title="title">Sit amet</a></td>
+                        <td><img th:each="img : ${#strings.listSplit(good.gimage, '|')}"
+                                 th:src="|/goods/getImg?imgpath=${img}|"
+                                 style="width: 60px; height: 40px; margin-right: 5px"/></td>
+                        <td th:text="${good.ginfo}">Consectetur adipiscing</td>
+                        <td th:text="${#numbers.formatCurrency(good.gprice)}">Donec tortor diam</td>
+                        <td th:text="${good.gsave}">Donec tortor diam</td>
+                        <td th:text="${good.tname}">Donec tortor diam</td>
+                        <td>
+                            <!-- Icons -->
+                            <a href="#" title="Edit">
+                                <img src="resources/images/icons/pencil.png" alt="Edit" /></a>
+                            <a href="#" title="Delete">
+                                <img src="resources/images/icons/cross.png" alt="Delete" /></a>
+                            <a th:onclick="|show_user_role(${good.id})|" title="Edit Meta">
+                                <img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <div class="bulk-actions align-left">
+                                </select> <a class="mybutton" onclick="open_goodsAdd()">增加</a>
+                            </div>
+                            <!--<div class="pagination">-->
+                            <!--<a href="#" title="First Page">&laquo; First</a><a href="#"-->
+                            <!--title="Previous Page">&laquo; Previous</a> <a href="#"-->
+                            <!--class="number" title="1">1</a> <a href="#" class="number"-->
+                            <!--title="2">2</a> <a href="#" class="number current" title="3">3</a>-->
+                            <!--<a href="#" class="number" title="4">4</a> <a href="#"-->
+                            <!--title="Next Page">Next &raquo;</a><a href="#"-->
+                            <!--title="Last Page">Last &raquo;</a>-->
+                            <!--</div> &lt;!&ndash; End .pagination &ndash;&gt;-->
+                            <div class="clear"></div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <!-- End .content-box-content -->
+    </div>
+</div>
+<!-- End #main-content -->
+<script>
+    function open_goodsAdd() {
+        $("#goodsadd_dialog").dialog({
+            title: "添加商品",
+            width: 500,
+            height: 400,
+            modal: true
+        });
+
+    }
+
+    $(function () {
+        var uploader = WebUploader.create({
+            auto:true,
+            // swf文件路径
+            swf: 'resources/widget/webuploader/Uploader.swf',
+            // 文件接收服务端。
+            server: '/goods/uploadimg',
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#chooseimg',
+            // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+            resize: false,
+            // 只允许选择图片文件。
+            accept: {
+                title: 'Images',
+                extensions: 'gif,jpg,jpeg,bmp,png',
+                mimeTypes: 'image/*'
+            }
+        });
+
+
+        //设置uploader的各种事件
+        // 当有文件添加进来的时候
+        uploader.on( 'fileQueued', function( file ) {
+
+            // 创建缩略图
+            // 如果为非图片文件，可以不用调用此方法。
+            // thumbnailWidth x thumbnailHeight 为 100 x 100
+            uploader.makeThumb( file, function( error, src ) {
+                if ( error ) {
+                    alert("该文件不能生成缩略图！");
+                    return;
+                }
+
+                var img = "<img src='" + src + "' style='width: 80px; height: 80px; margin: 10px'/>";
+                $("#showPic").append(img);
+            }, 100, 100);
+        });
+
+        //设置文件上传成功的事件
+        uploader.on('uploadSuccess', function(file, response){
+           alert(file.name + "上传成功，上传后的路径为:" + response.filepath)
+            var images = $("#gimage").val();
+            if(images != ""){
+                images += "|";
+            }
+            images += response.filepath;
+            $("#gimage").val(images);
+        });
+    })
+
+    function show_gtypetname() {
+        $("#add_gtypetname").dialog({
+            title:"选择父类别",
+            width: 200,
+            height: 200,
+            modal: true
+        });
+        var setting = {
+            data: {
+                key: {
+                    name: "tname"
+                },
+                simpleData: {
+                    enable: true,
+                    pIdKey: "fid",
+                }
+            },
+            view: {
+                showIcon: false
+             },
+            callback: {
+                onClick: function (event, treeId, treeNode) {
+
+                    $("#show_tname").text(treeNode.tname);
+                    $("#add_gtypetname").dialog("close");
+                    $("#tid").val(treeNode.id);
+
+                }
+            }
+        }
+        $.post("/gtype/gtypeajax",function (data) {
+            var zTreeObj= $.fn.zTree.init($("#ztree_gtypetname"), setting, data);
+            zTreeObj.expandAll(true);
+        },"json");
+    }
+</script>
+
+<div id="goodsadd_dialog" style="display: none">
+    <form action="/goods/goodsadd" method="post">
+        商品名称:<input type="text" name="gname"/><br/>
+        商品图片:<div id="chooseimg">选择图片</div>
+        <div id="showPic" style="width: 200px; height: 150px; border: #ff0000 solid 1px"></div>
+        <input id="gimage" name="gimage" type="hidden" value=""/>
+        <br/>
+        商品描述:<input type="text" name="ginfo"/><br/>
+        商品价格:<input type="text" name="gprice"/><br/>
+        商品库存:<input type="text" name="gsave"/><br/>
+        所属类别:<button id="show_tname" type="button" onclick="show_gtypetname()">家电</button>
+                <input type="hidden" id="tid" name="tid" value=""/>
+        <br/>
+        <input type="submit" value="增加"/>
+    </form>
+</div>
+<div id="add_gtypetname" style="display: none">
+    <div id="ztree_gtypetname" class="ztree"></div>
+</div>
+</body>
+</html>

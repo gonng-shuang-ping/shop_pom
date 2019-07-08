@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
+<head>
+    <base th:href="${#request.getContextPath()+'/'}">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Insert title here</title>
+    <!-- Invalid Stylesheet. This makes stuff look pretty. Remove it if you want the CSS completely valid -->
+    <!-- Reset Stylesheet -->
+    <link rel="stylesheet" href="resources/css/reset.css" type="text/css"
+          media="screen" />
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="resources/css/style.css" type="text/css"
+          media="screen" />
+    <link rel="stylesheet" href="resources/css/invalid.css" type="text/css"
+          media="screen" />
+
+    <!--                       Javascripts                       -->
+    <!-- jQuery -->
+    <script type="text/javascript"
+            src="resources/scripts/jquery-1.8.3.min.js"></script>
+    <!-- jQuery Configuration -->
+    <!--<script type="text/javascript"-->
+    <!--src="resources/scripts/simpla.jquery.configuration.js"></script>-->
+
+    <!-- 添加弹出框的jquery插件 -->
+    <script type="text/javascript" src="resources/widget/dialog/jquery-ui-1.9.2.custom.min.js"></script>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+
+    <!-- 添加树形结构插件 ztree -->
+    <script type="text/javascript" src="resources/widget/zTree/jquery.ztree.all.min.js"></script>
+    <link rel="stylesheet" href="resources/widget/zTree/zTreeStyle/zTreeStyle.css">
+
+    <!--引入JS-->
+    <script type="text/javascript" src="resources/widget/webuploader/webuploader.min.js"></script>
+    <!--引入CSS-->
+    <link rel="stylesheet" href="resources/widget/webuploader/webuploader.css">
+
+
+</head>
+<body>
+<div id="main-content">
+    <div class="content-box">
+        <!-- End .content-box-header -->
+        <div class="content-box-content">
+            <div class="tab-content default-tab" id="tab1">
+                <table>
+                    <thead>
+                    <tr>
+                        <th><input class="check-all" type="checkbox" /></th>
+                        <th>id</th>
+                        <th>类别名称</th>
+                        <th>父类别</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="gtype: ${gtypes}">
+                        <td><input type="checkbox" /></td>
+                        <td th:text="${gtype.id}">Lorem ipsum dolor</td>
+                        <td th:text="${gtype.tname}">Donec tortor diam</td>
+                        <td th:text="${gtype.pname!=null?gtype.pname:'无'}"><a href="#" title="title">Sit amet</a></td>
+                        <td>
+                            <!-- Icons -->
+                            <a href="#" title="Edit">
+                                <img src="resources/images/icons/pencil.png" alt="Edit" /></a>
+                            <a href="#" title="Delete">
+                                <img src="resources/images/icons/cross.png" alt="Delete" /></a>
+                            <a title="Edit Meta">
+                                <img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <div class="bulk-actions align-left">
+                                </select> <a class="mybutton" onclick="open_gtypeAdd();">增加</a>
+                            </div>
+                            <!--<div class="pagination">-->
+                            <!--<a href="#" title="First Page">&laquo; First</a><a href="#"-->
+                            <!--title="Previous Page">&laquo; Previous</a> <a href="#"-->
+                            <!--class="number" title="1">1</a> <a href="#" class="number"-->
+                            <!--title="2">2</a> <a href="#" class="number current" title="3">3</a>-->
+                            <!--<a href="#" class="number" title="4">4</a> <a href="#"-->
+                            <!--title="Next Page">Next &raquo;</a><a href="#"-->
+                            <!--title="Last Page">Last &raquo;</a>-->
+                            <!--</div> &lt;!&ndash; End .pagination &ndash;&gt;-->
+                            <div class="clear"></div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <!-- End .content-box-content -->
+    </div>
+</div>
+<!-- End #main-content -->
+<script>
+    function open_gtypeAdd() {
+        $("#show_gtypeAdd").dialog({
+            title:"添加商品分类",
+            width: 400,
+            height: 300,
+            modal: true
+        })
+    }
+    function show_ztree() {
+
+        var setting={
+            data:{
+                key:{
+                    name:"tname"
+                },
+                simpleData: {
+                    enable: true,
+                    pIdKey: "fid",
+                }
+            },
+            view:{
+                 showIcon: false
+             },
+            callback: {
+                onClick:function (event, treeId, treeNode) {
+
+                    $("#ztree_gtype").text(treeNode.tname);
+                    $("#show_gtypeztree").dialog("close");
+                    $("#fid").val(treeNode.id);
+
+                }
+            }
+        }
+        $.post("/gtype/gtypeajax",function (data) {
+            var zTreeObj= $.fn.zTree.init($("#show_gtype_ztree"), setting, data);
+            zTreeObj.expandAll(true);
+        },"json");
+        $("#show_gtypeztree").dialog({
+            title:"选择父类别",
+            width: 200,
+            height: 200,
+            modal: true
+        });
+    }
+
+</script>
+
+<div id="show_gtypeAdd" style="display: none">
+    <form action="/gtype/gtypeAdd">
+        类别名称:<input type="text" name="tname"/><br/>
+        父类别:<button type="button" id="ztree_gtype" onclick="show_ztree()">无</button>
+                <input type="hidden" id="fid" name="fid" value="-1"/><br/>
+        <input type="submit" value="增加"/>
+    </form>
+</div>
+
+<div id="show_gtypeztree" style="display: none">
+    <div id="show_gtype_ztree" class="ztree"></div>
+</div>
+
+</body>
+</html>
